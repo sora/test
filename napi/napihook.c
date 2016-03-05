@@ -26,7 +26,7 @@ static int __init nh_init(void)
 
 	nh.dev = dev_get_by_name(&init_net, ifname);
 	if (!nh.dev) {
-		pr_warn("Could not find %s\n", ifname);
+		pr_err("Could not find %s\n", ifname);
 		rc = -1;
 	}
 
