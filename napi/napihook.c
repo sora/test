@@ -11,7 +11,7 @@ static int __init nh_init(void)
 {
 	int rc = 0;
 
-	pr_info("napihook (%s) is loaded", NAPIHOOK_VERSION);
+	pr_info("napihook (v%s) is loaded", NAPIHOOK_VERSION);
 
 	return rc;
 }
@@ -20,7 +20,7 @@ module_init(nh_init);
 
 static void __exit nh_release(void)
 {
-	pr_info("napihook (%s) is unloaded", NAPIHOOK_VERSION);
+	pr_info("napihook (v%s) is unloaded", NAPIHOOK_VERSION);
 	return;
 }
 module_exit(nh_release);
