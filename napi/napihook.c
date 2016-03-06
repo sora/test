@@ -38,7 +38,19 @@ static struct nh_dev *nh;
 
 static inline void rxthread_body(void)
 {
-	pr_info("rxthread_body\n");
+	//struct softnet_data *sd = this_cpu_ptr(&softnet_data);
+	struct softnet_data *sd0 = per_cpu_ptr(&softnet_data, 0);
+	struct softnet_data *sd1 = per_cpu_ptr(&softnet_data, 1);
+	struct softnet_data *sd2 = per_cpu_ptr(&softnet_data, 2);
+	struct softnet_data *sd3 = per_cpu_ptr(&softnet_data, 3);
+	int s0, s1, s2, s3;
+
+	s0 = list_empty(&sd0->poll_list) ? 0 : 1;
+	s1 = list_empty(&sd1->poll_list) ? 0 : 1;
+	s2 = list_empty(&sd2->poll_list) ? 0 : 1;
+	s3 = list_empty(&sd3->poll_list) ? 0 : 1;
+	pr_info("sd: cpu%d: %d, cpu%d: %d, cpu%d: %d, cpu%d: %d\n",
+			sd0->cpu, s0, sd1->cpu, s1, sd2->cpu, s2, sd3->cpu, s3);
 }
 
 static int rxthread_worker(void *arg)
@@ -49,7 +61,7 @@ static int rxthread_worker(void *arg)
 	set_current_state(TASK_INTERRUPTIBLE);
 
 	while (!kthread_should_stop()) {
-		schedule_timeout_interruptible(1000);
+		schedule_timeout_interruptible(100);
 
 		__set_current_state(TASK_RUNNING);
 
