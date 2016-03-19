@@ -21,6 +21,7 @@ static char *ifname = "eth0";
 
 /* Global variables */
 static struct rh_dev *rh;
+static unsigned int pps[16];
 
 
 /* note: already called with rcu_read_lock */
@@ -28,9 +29,10 @@ static rx_handler_result_t rh_handle_frame(struct sk_buff **pskb)
 {
 	rx_handler_result_t res = RX_HANDLER_CONSUMED;
 	struct sk_buff *skb = *pskb;
-	const unsigned char *dest = eth_hdr(skb)->h_dest;
+	//const unsigned char *dest = eth_hdr(skb)->h_dest;
+	//pr_info("Mac address: %pM\n", dest);
 
-	pr_info("Mac address: %pM\n", dest);
+	++pps[smp_processor_id()];
 
 	kfree_skb(skb);
 	*pskb = NULL;
@@ -41,6 +43,7 @@ static rx_handler_result_t rh_handle_frame(struct sk_buff **pskb)
 static int __init rh_init(void)
 {
 	int rc = 0, err;
+	int i;
 
 	pr_info("rxhook (v%s) is loaded\n", RXHOOK_VERSION);
 
@@ -69,6 +72,9 @@ static int __init rh_init(void)
 		pr_err("%s failed to register rx_handler\n", ifname);
 	}
 
+	for(i = 0; i < 10; i++)
+		pps[i] = 0;
+
 out:
 	return rc;
 }
@@ -77,6 +83,9 @@ module_init(rh_init);
 
 static void __exit rh_release(void)
 {
+	int i;
+	unsigned int sum = 0;
+
 	pr_info("rxhook (v%s) is unloaded\n", RXHOOK_VERSION);
 
 	rtnl_lock();
@@ -85,6 +94,12 @@ static void __exit rh_release(void)
 
 	kfree(rh);
 	rh = NULL;
+
+	for(i = 0; i < 10; i++) {
+		pr_info("pps[%d] = %d\n", i, pps[i]);
+		sum += pps[i];
+	}
+	pr_info("sum: %u\n", sum);
 
 	return;
 }
