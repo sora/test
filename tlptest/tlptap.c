@@ -22,6 +22,7 @@ struct mmio {
 };
 
 struct nfsume {
+	struct pci_dev *pcidev;
 	struct mmio mmio0;
 	struct mmio mmio1;
 };
@@ -169,6 +170,7 @@ static int __init tt_init(void)
 	rc = misc_register(&tlptap_dev);
 	if (rc) {
 		pr_err("fail to misc_register (MISC_DYNAMIC_MINOR)\n");
+		rc = -1;
 		goto error;
 	}
 
@@ -177,7 +179,9 @@ static int __init tt_init(void)
 error:
 	kfree(tt);
 	tt = NULL;
-	return -1;
+	pci_release_regions (pdev);
+	pci_disable_device (pdev);
+	return rc;
 }
 module_init(tt_init);
 
