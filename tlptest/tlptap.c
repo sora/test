@@ -190,11 +190,11 @@ static void __exit tt_release(void)
 {
 	pr_info("tlptap (v%s) is unloaded\n", WRMOD_VERSION);
 
-	kfree(tt);
-	tt = NULL;
-
 	misc_deregister(&tlptap_dev);
 	pci_unregister_driver(&tlptap_pci_driver);
+
+	kfree(tt);
+	tt = NULL;
 
 	return;
 }
