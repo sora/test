@@ -22,7 +22,6 @@ struct mmio {
 };
 
 struct nfsume {
-	struct pci_dev *pcidev;
 	struct mmio mmio0;
 	struct mmio mmio1;
 };
@@ -47,7 +46,7 @@ static int tlptap_release(struct inode *inode, struct file *filp)
 	return 0;
 }
 
-static int tlptap_pci_init(struct pci_dev *pcidev,
+static int tlptap_pci_init(struct pci_dev *pdev,
 		const struct pci_device_id *ent)
 {
 	int rc;
@@ -56,19 +55,19 @@ static int tlptap_pci_init(struct pci_dev *pcidev,
 
 	pr_info("%s\n", __func__);
 
-	rc = pci_enable_device(pcidev);
+	rc = pci_enable_device(pdev);
 	if (rc)
 		goto error;
 
-	rc = pci_request_regions(pcidev, DRV_NAME);
+	rc = pci_request_regions(pdev, DRV_NAME);
 	if (rc)
 		goto error;
 
 	/* BAR0 (pcie pio) */
-	mmio0->start = pci_resource_start(pcidev, 0);
-	mmio0->end = pci_resource_end(pcidev, 0);
-	mmio0->flags = pci_resource_flags(pcidev, 0);
-	mmio0->len = pci_resource_len(pcidev, 0);
+	mmio0->start = pci_resource_start(pdev, 0);
+	mmio0->end = pci_resource_end(pdev, 0);
+	mmio0->flags = pci_resource_flags(pdev, 0);
+	mmio0->len = pci_resource_len(pdev, 0);
 	mmio0->virt = ioremap(mmio0->start, mmio0->len);
 	if(!mmio0->virt) {
 		pr_info("cannot ioremap MMIO0 base\n");
@@ -80,10 +79,10 @@ static int tlptap_pci_init(struct pci_dev *pcidev,
 	pr_info("mmio0_len  : %X\n", (unsigned int)mmio0->len);
 
 	/* BAR1 (pcie pio) */
-	mmio1->start = pci_resource_start(pcidev, 2);
-	mmio1->end = pci_resource_end(pcidev, 2);
-	mmio1->flags = pci_resource_flags(pcidev, 2);
-	mmio1->len = pci_resource_len(pcidev, 2);
+	mmio1->start = pci_resource_start(pdev, 2);
+	mmio1->end = pci_resource_end(pdev, 2);
+	mmio1->flags = pci_resource_flags(pdev, 2);
+	mmio1->len = pci_resource_len(pdev, 2);
 	mmio1->virt = ioremap(mmio1->start, mmio1->len);
 	if (!mmio1->virt) {
 		pr_info("cannot ioremap MMIO1 base\n");
@@ -99,12 +98,12 @@ static int tlptap_pci_init(struct pci_dev *pcidev,
 
 error:
 	pr_info("tlptap_pci_init error\n");
-	pci_release_regions(pcidev);
-	pci_disable_device(pcidev);
+	pci_release_regions(pdev);
+	pci_disable_device(pdev);
 	return -1;
 }
 
-static void tlptap_pci_remove(struct pci_dev *pcidev)
+static void tlptap_pci_remove(struct pci_dev *pdev)
 {
 	struct mmio *mmio0 = &tt->dev.mmio0;
 	struct mmio *mmio1 = &tt->dev.mmio1;
@@ -119,8 +118,8 @@ static void tlptap_pci_remove(struct pci_dev *pcidev)
 		iounmap(mmio1->virt);
 		mmio1->virt = 0;
 	}
-	pci_release_regions(pcidev);
-	pci_disable_device(pcidev);
+	pci_release_regions(pdev);
+	pci_disable_device(pdev);
 }
 
 static struct file_operations tlptap_fops = {
@@ -179,8 +178,6 @@ static int __init tt_init(void)
 error:
 	kfree(tt);
 	tt = NULL;
-	pci_release_regions (pdev);
-	pci_disable_device (pdev);
 	return rc;
 }
 module_init(tt_init);
