@@ -50,14 +50,16 @@ static ssize_t tlptap_write(struct file *filp, const char __user *buf,
 		size_t count, loff_t *ppos)
 {
 	pr_info("%s\n", __func__);
-	return 0;
+
+	return count;
 }
 
 static ssize_t tlptap_read(struct file *filp, char __user *buf,
 		size_t count, loff_t *ppos)
 {
 	pr_info("%s\n", __func__);
-	return 0;
+
+	return count;
 }
 
 
