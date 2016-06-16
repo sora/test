@@ -36,15 +36,30 @@ static struct tt_dev *tt;
 
 static int tlptap_open(struct inode *inode, struct file *filp)
 {
-	pr_info("entering %s\n", __func__);
+	pr_info("%s\n", __func__);
 	return 0;
 }
 
 static int tlptap_release(struct inode *inode, struct file *filp)
 {
-	pr_info("entering %s\n", __func__);
+	pr_info("%s\n", __func__);
 	return 0;
 }
+
+static ssize_t tlptap_write(struct file *filp, const char __user *buf,
+		size_t count, loff_t *ppos)
+{
+	pr_info("%s\n", __func__);
+	return 0;
+}
+
+static ssize_t tlptap_read(struct file *filp, char __user *buf,
+		size_t count, loff_t *ppos)
+{
+	pr_info("%s\n", __func__);
+	return 0;
+}
+
 
 static int tlptap_pci_init(struct pci_dev *pdev,
 		const struct pci_device_id *ent)
@@ -65,10 +80,10 @@ static int tlptap_pci_init(struct pci_dev *pdev,
 
 	/* BAR0 (pcie pio) */
 	bar0->start = pci_resource_start(pdev, 0);
-	bar0->end = pci_resource_end(pdev, 0);
+	bar0->end   = pci_resource_end(pdev, 0);
 	bar0->flags = pci_resource_flags(pdev, 0);
-	bar0->len = pci_resource_len(pdev, 0);
-	bar0->virt = ioremap(bar0->start, bar0->len);
+	bar0->len   = pci_resource_len(pdev, 0);
+	bar0->virt  = ioremap(bar0->start, bar0->len);
 	if(!bar0->virt) {
 		pr_info("cannot ioremap MMIO0 base\n");
 		goto error;
@@ -80,10 +95,10 @@ static int tlptap_pci_init(struct pci_dev *pdev,
 
 	/* BAR1 (pcie pio) */
 	bar2->start = pci_resource_start(pdev, 2);
-	bar2->end = pci_resource_end(pdev, 2);
+	bar2->end   = pci_resource_end(pdev, 2);
 	bar2->flags = pci_resource_flags(pdev, 2);
-	bar2->len = pci_resource_len(pdev, 2);
-	bar2->virt = ioremap(bar2->start, bar2->len);
+	bar2->len   = pci_resource_len(pdev, 2);
+	bar2->virt  = ioremap(bar2->start, bar2->len);
 	if (!bar2->virt) {
 		pr_info("cannot ioremap MMIO1 base\n");
 		goto error;
@@ -124,8 +139,8 @@ static void tlptap_pci_remove(struct pci_dev *pdev)
 
 static struct file_operations tlptap_fops = {
 	.owner        = THIS_MODULE,
-//	.read         = tlptap_read,
-//	.write        = tlptap_write,
+	.read         = tlptap_read,
+	.write        = tlptap_write,
 //	.poll         = tlptap_poll,
 //	.compat_ioctl = tlptap_ioctl,
 	.open         = tlptap_open,
