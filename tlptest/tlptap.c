@@ -22,8 +22,8 @@ struct mmio {
 };
 
 struct nfsume {
-	struct mmio mmio0;
-	struct mmio mmio1;
+	struct mmio bar0;
+	struct mmio bar2;
 };
 
 struct tt_dev {
@@ -50,8 +50,8 @@ static int tlptap_pci_init(struct pci_dev *pdev,
 		const struct pci_device_id *ent)
 {
 	int rc;
-	struct mmio *mmio0 = &tt->dev.mmio0;
-	struct mmio *mmio1 = &tt->dev.mmio1;
+	struct mmio *bar0 = &tt->dev.bar0;
+	struct mmio *bar2 = &tt->dev.bar2;
 
 	pr_info("%s\n", __func__);
 
@@ -64,35 +64,35 @@ static int tlptap_pci_init(struct pci_dev *pdev,
 		goto error;
 
 	/* BAR0 (pcie pio) */
-	mmio0->start = pci_resource_start(pdev, 0);
-	mmio0->end = pci_resource_end(pdev, 0);
-	mmio0->flags = pci_resource_flags(pdev, 0);
-	mmio0->len = pci_resource_len(pdev, 0);
-	mmio0->virt = ioremap(mmio0->start, mmio0->len);
-	if(!mmio0->virt) {
+	bar0->start = pci_resource_start(pdev, 0);
+	bar0->end = pci_resource_end(pdev, 0);
+	bar0->flags = pci_resource_flags(pdev, 0);
+	bar0->len = pci_resource_len(pdev, 0);
+	bar0->virt = ioremap(bar0->start, bar0->len);
+	if(!bar0->virt) {
 		pr_info("cannot ioremap MMIO0 base\n");
 		goto error;
 	}
-	pr_info("mmio0_start: %X\n", (unsigned int)mmio0->start);
-	pr_info("mmio0_end  : %X\n", (unsigned int)mmio0->end);
-	pr_info("mmio0_flags: %X\n", (unsigned int)mmio0->flags);
-	pr_info("mmio0_len  : %X\n", (unsigned int)mmio0->len);
+	pr_info("bar0_start: %X\n", (unsigned int)bar0->start);
+	pr_info("bar0_end  : %X\n", (unsigned int)bar0->end);
+	pr_info("bar0_flags: %X\n", (unsigned int)bar0->flags);
+	pr_info("bar0_len  : %X\n", (unsigned int)bar0->len);
 
 	/* BAR1 (pcie pio) */
-	mmio1->start = pci_resource_start(pdev, 2);
-	mmio1->end = pci_resource_end(pdev, 2);
-	mmio1->flags = pci_resource_flags(pdev, 2);
-	mmio1->len = pci_resource_len(pdev, 2);
-	mmio1->virt = ioremap(mmio1->start, mmio1->len);
-	if (!mmio1->virt) {
+	bar2->start = pci_resource_start(pdev, 2);
+	bar2->end = pci_resource_end(pdev, 2);
+	bar2->flags = pci_resource_flags(pdev, 2);
+	bar2->len = pci_resource_len(pdev, 2);
+	bar2->virt = ioremap(bar2->start, bar2->len);
+	if (!bar2->virt) {
 		pr_info("cannot ioremap MMIO1 base\n");
 		goto error;
 	}
-	pr_info("mmio1_virt : %p\n", mmio1->virt);
-	pr_info("mmio1_start: %X\n", (unsigned int)mmio1->start);
-	pr_info("mmio1_end  : %X\n", (unsigned int)mmio1->end);
-	pr_info("mmio1_flags: %X\n", (unsigned int)mmio1->flags);
-	pr_info("mmio1_len  : %X\n", (unsigned int)mmio1->len);
+	pr_info("bar2_virt : %p\n", bar2->virt);
+	pr_info("bar2_start: %X\n", (unsigned int)bar2->start);
+	pr_info("bar2_end  : %X\n", (unsigned int)bar2->end);
+	pr_info("bar2_flags: %X\n", (unsigned int)bar2->flags);
+	pr_info("bar2_len  : %X\n", (unsigned int)bar2->len);
 
 	return 0;
 
@@ -105,18 +105,18 @@ error:
 
 static void tlptap_pci_remove(struct pci_dev *pdev)
 {
-	struct mmio *mmio0 = &tt->dev.mmio0;
-	struct mmio *mmio1 = &tt->dev.mmio1;
+	struct mmio *bar0 = &tt->dev.bar0;
+	struct mmio *bar2 = &tt->dev.bar2;
 
 	pr_info("%s\n", __func__);
 
-	if (mmio0->virt) {
-		iounmap(mmio0->virt);
-		mmio0->virt = 0;
+	if (bar0->virt) {
+		iounmap(bar0->virt);
+		bar0->virt = 0;
 	}
-	if (mmio1->virt) {
-		iounmap(mmio1->virt);
-		mmio1->virt = 0;
+	if (bar2->virt) {
+		iounmap(bar2->virt);
+		bar2->virt = 0;
 	}
 	pci_release_regions(pdev);
 	pci_disable_device(pdev);
