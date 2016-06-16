@@ -97,6 +97,7 @@ static int tlptap_pci_init(struct pci_dev *pcidev,
 	return 0;
 
 error:
+	pr_info("tlptap_pci_init error\n");
 	pci_release_regions(pcidev);
 	pci_disable_device(pcidev);
 	return -1;
